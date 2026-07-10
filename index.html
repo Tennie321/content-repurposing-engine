@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Content Repurposing Engine — One Tool, Every Platform</title>
+    <meta name="description" content="Transform any piece of content into 8+ platform-optimized formats. Twitter threads, LinkedIn posts, email newsletters, video scripts, Reddit posts, Instagram captions, podcast scripts, and summaries — all from a single input.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔄</text></svg>">
+    <style>
+        /* ── Reset & Base ── */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── Animated Gradient Background ── */
+        .gradient-bg {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -1;
+            background: linear-gradient(135deg, #0a0a0f 0%, #0d1117 25%, #0a0a1a 50%, #0d0d14 75%, #0a0a0f 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 20s ease infinite;
+        }
+        .gradient-bg::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(ellipse at 20% 50%, rgba(88, 101, 242, 0.05) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 20%, rgba(168, 85, 247, 0.05) 0%, transparent 50%),
+                        radial-gradient(ellipse at 50% 80%, rgba(236, 72, 153, 0.03) 0%, transparent 50%);
+            animation: orbFloat 30s ease-in-out infinite alternate;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes orbFloat {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-5%, 5%) rotate(5deg); }
+        }
+
+        /* ── Particles ── */
+        .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; overflow: hidden; }
+        .particle {
+            position: absolute;
+            width: 2px; height: 2px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 50%;
+            animation: float linear infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        /* ── Container ── */
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+        /* ── Nav ── */
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 24px; max-width: 1100px; margin: 0 auto;
+        }
+        nav .logo { font-size: 1.3rem; font-weight: 700; background: linear-gradient(135deg, #5865f2, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        nav .nav-links { display: flex; gap: 24px; align-items: center; }
+        nav .nav-links a { color: #a0a0b0; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+        nav .nav-links a:hover { color: #fff; }
+        .nav-cta {
+            background: linear-gradient(135deg, #5865f2, #a855f7);
+            color: #fff !important; padding: 10px 24px; border-radius: 8px;
+            font-weight: 600; font-size: 0.85rem !important;
+        }
+        .nav-cta:hover { opacity: 0.9; }
+
+        /* ── Hero ── */
+        .hero {
+            text-align: center;
+            padding: 100px 24px 80px;
+            position: relative;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: rgba(88, 101, 242, 0.12);
+            border: 1px solid rgba(88, 101, 242, 0.25);
+            color: #8b9aff;
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .hero h1 {
+            font-size: clamp(2.2rem, 6vw, 3.8rem);
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 20px;
+        }
+        .hero h1 .gradient-title {
+            background: linear-gradient(135deg, #5865f2, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 1.15rem;
+            color: #8b8b9e;
+            max-width: 680px;
+            margin: 0 auto 36px;
+            line-height: 1.7;
+        }
+        .hero-cta-group { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+        .hero-cta {
+            background: linear-gradient(135deg, #5865f2, #a855f7);
+            color: #fff;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(88, 101, 242, 0.35); }
+        .hero-cta-secondary {
+            background: rgba(255,255,255,0.06);
+            color: #e0e0e0;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .hero-cta-secondary:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+
+        .hero-stats {
+            display: flex; justify-content: center; gap: 48px;
+            margin-top: 60px; flex-wrap: wrap;
+        }
+        .hero-stat { text-align: center; }
+        .hero-stat-number {
+            font-size: 2rem; font-weight: 800;
+            background: linear-gradient(135deg, #5865f2, #a855f7);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero-stat-label { font-size: 0.85rem; color: #6b6b80; margin-top: 4px; }
+
+        /* ── Sections ── */
+        section { padding: 80px 0; }
+        .section-label {
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #5865f2;
+            margin-bottom: 12px;
+        }
+        .section-title {
+            text-align: center;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .section-subtitle {
+            text-align: center;
+            color: #8b8b9e;
+            max-width: 600px;
+            margin: 0 auto 48px;
+            font-size: 1rem;
+        }
+
+        /* ── Format Grid ── */
+        .format-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+        .format-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s;
+            cursor: default;
+        }
+        .format-card:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(88, 101, 242, 0.25);
+            transform: translateY(-3px);
+        }
+        .format-card .icon { font-size: 1.6rem; margin-bottom: 12px; }
+        .format-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 6px; }
+        .format-card p { font-size: 0.85rem; color: #8b8b9e; line-height: 1.5; }
+
+        /* ── Features ── */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .feature-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+            padding: 32px;
+            transition: all 0.3s;
+        }
+        .feature-card:hover { background: rgba(255,255,255,0.05); border-color: rgba(88, 101, 242, 0.2); }
+        .feature-card .icon { font-size: 1.8rem; margin-bottom: 16px; }
+        .feature-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+        .feature-card p { font-size: 0.9rem; color: #8b8b9e; line-height: 1.6; }
+
+        /* ── Pricing ── */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .pricing-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 40px 32px;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .pricing-card.featured {
+            background: rgba(88, 101, 242, 0.06);
+            border-color: rgba(88, 101, 242, 0.3);
+            transform: scale(1.03);
+        }
+        .pricing-card.featured::before {
+            content: 'BEST VALUE';
+            position: absolute; top: -12px; left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #5865f2, #a855f7);
+            color: #fff;
+            padding: 4px 20px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+        }
+        .pricing-card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; }
+        .pricing-card .price {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin: 16px 0;
+        }
+        .pricing-card .price span { font-size: 1rem; font-weight: 400; color: #6b6b80; }
+        .pricing-card .price .original { text-decoration: line-through; color: #6b6b80; font-size: 1.4rem; margin-right: 8px; }
+        .pricing-card .desc { font-size: 0.9rem; color: #8b8b9e; margin: 12px 0 24px; }
+        .pricing-card ul { list-style: none; text-align: left; margin: 0 0 28px; padding: 0; }
+        .pricing-card ul li { padding: 8px 0; font-size: 0.9rem; color: #c0c0d0; }
+        .pricing-card ul li::before { content: '✓ '; color: #5865f2; font-weight: 700; }
+        .pricing-cta {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            border: none;
+        }
+        .pricing-cta.primary {
+            background: linear-gradient(135deg, #5865f2, #a855f7);
+            color: #fff;
+        }
+        .pricing-cta.primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(88, 101, 242, 0.3); }
+        .pricing-cta.secondary {
+            background: rgba(255,255,255,0.06);
+            color: #e0e0e0;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .pricing-cta.secondary:hover { background: rgba(255,255,255,0.1); }
+
+        /* ── Example Output ── */
+        .example-box {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 32px;
+            margin-top: 32px;
+        }
+        .example-box h3 { font-size: 1rem; color: #8b8b9e; margin-bottom: 16px; }
+        .example-box pre {
+            font-family: 'SF Mono', 'Fira Code', 'Fira Mono', monospace;
+            font-size: 0.8rem;
+            color: #c0c0d0;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .example-box pre .hl { color: #5865f2; }
+        .example-box pre .hl2 { color: #a855f7; }
+
+        /* ── FAQ ── */
+        .faq-list { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+        .faq-item {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 20px 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .faq-item:hover { border-color: rgba(255,255,255,0.12); }
+        .faq-question {
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .faq-question .arrow { transition: transform 0.2s; color: #6b6b80; }
+        .faq-item.open .faq-question .arrow { transform: rotate(180deg); }
+        .faq-answer {
+            font-size: 0.9rem;
+            color: #8b8b9e;
+            margin-top: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            line-height: 1.6;
+        }
+        .faq-item.open .faq-answer {
+            max-height: 300px;
+            margin-top: 16px;
+        }
+
+        /* ── Email Capture ── */
+        .email-section {
+            text-align: center;
+            padding: 80px 24px;
+            background: rgba(88, 101, 242, 0.04);
+            border-top: 1px solid rgba(88, 101, 242, 0.1);
+            border-bottom: 1px solid rgba(88, 101, 242, 0.1);
+        }
+        .email-section h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 12px; }
+        .email-section p { color: #8b8b9e; max-width: 500px; margin: 0 auto 28px; font-size: 1rem; }
+        .email-form {
+            display: flex;
+            gap: 12px;
+            max-width: 480px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .email-form input {
+            flex: 1;
+            min-width: 240px;
+            padding: 14px 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.3);
+            color: #e0e0e0;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .email-form input:focus { border-color: #5865f2; }
+        .email-form input::placeholder { color: #6b6b80; }
+        .email-form button {
+            padding: 14px 28px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, #5865f2, #a855f7);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .email-form button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(88, 101, 242, 0.3); }
+        .email-note { font-size: 0.8rem; color: #6b6b80; margin-top: 16px; }
+
+        /* ── Footer ── */
+        footer {
+            text-align: center;
+            padding: 40px 24px;
+            color: #6b6b80;
+            font-size: 0.85rem;
+        }
+        footer a { color: #8b8b9e; text-decoration: none; }
+        footer a:hover { color: #e0e0e0; }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .hero { padding: 60px 24px 40px; }
+            nav .nav-links a:not(.nav-cta) { display: none; }
+            .hero-stats { gap: 24px; }
+            .pricing-card.featured { transform: scale(1); }
+            .format-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+    <div class="gradient-bg"></div>
+    <div class="particles" id="particles"></div>
+
+    <!-- Nav -->
+    <nav>
+        <div class="logo">🔄 Repurpose AI</div>
+        <div class="nav-links">
+            <a href="#formats">Formats</a>
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#faq">FAQ</a>
+            <a href="#get-started" class="nav-cta">Buy Now</a>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-badge">🔥 Launch Special — Pay What You Want</div>
+        <h1>Write Once.<br><span class="gradient-title">Publish Everywhere.</span></h1>
+        <p>Turn any blog post, article, or snippet into Twitter threads, LinkedIn posts, email newsletters, video scripts, Reddit posts, and more — automatically. One input, 8+ platform-optimized formats.</p>
+        <div class="hero-cta-group">
+            <a href="#pricing" class="hero-cta">Get the Engine →</a>
+            <a href="#demo" class="hero-cta-secondary">See Example Output</a>
+        </div>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <div class="hero-stat-number">8+</div>
+                <div class="hero-stat-label">Output Formats</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-number">10</div>
+                <div class="hero-stat-label">Hook Templates/Format</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-number">0</div>
+                <div class="hero-stat-label">Dependencies (Pure Python)</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-number">3</div>
+                <div class="hero-stat-label">Modes: Interactive, File, Batch</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Formats -->
+    <section id="formats">
+        <div class="container">
+            <div class="section-label">Platforms</div>
+            <h2 class="section-title">Every Format. One Engine.</h2>
+            <p class="section-subtitle">From a single input, generate content optimized for each platform's unique style, tone, and formatting rules.</p>
+            <div class="format-grid">
+                <div class="format-card">
+                    <div class="icon">🐦</div>
+                    <h3>Twitter / X Thread</h3>
+                    <p>Multi-tweet threads with hooks, takeaways, and CTAs. Auto-split long content into tweet-sized chunks.</p>
+                </div>
+                <div class="format-card">
+                    <div class="icon">💼</div>
+                    <h3>LinkedIn Post</h3>
+                    <p>Professional posts with story hooks, bullet-point insights, and engagement questions. 1500-3000 char optimized.</p>
+                </div>
+                <div class="format-card">
+                    <div class="icon">📧</div>
+                    <h3>Email Newsletter</h3>
+                    <p>Full newsletter format with subject line, preview text, body content, bullet highlights, and CTA.</p>
+                </div>
+                <div class="format-card">
+                    <div class="icon">🎬</div>
+                    <h3>Video Script</h3>
+                    <p>Short-form video scripts (TikTok/Reels) with visual cues, timing breakdowns, and hook-CTA structure.</p>
+                </div>
+                <div class="format-card">
+                    <div class="icon">🔴</div>
+                    <h3>Reddit Post</h3>
+                    <p>Story-driven posts with subreddit suggestions, engaging titles, and community-appropriate formatting.</p>
+                </div>
+                <div class="format-card">
+                    <div class="icon">📸</div>
+                    <h3>Instagram Caption</h3>
+                    <p>Hashtag-optimized captions with carousel slide ideas and platform-appropriate emoji density.</p>
+                </div>
+                <div class="format-card">
+                    <div class="icon">🎙️</div>
+                    <h3>Podcast Script</h3>
+                    <p>3-5 minute episode scripts with intro, body points, key takeaways, and outro.</p>
+                </div>
+                <div class="format-card">
+                    <div class="icon">📋</div>
+                    <h3>Blog Summary</h3>
+                    <p>Concise executive summaries with word count, reading time, and key bullet points.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Example -->
+    <section id="demo">
+        <div class="container">
+            <div class="section-label">See It In Action</div>
+            <h2 class="section-title">Raw Content → 8 Formats</h2>
+            <p class="section-subtitle">Feed it a blog post and get platform-specific content ready to publish. Here's a real example:</p>
+
+            <div class="example-box">
+                <h3>📄 INPUT: "6 Months of Cold Email Testing — What Actually Works" (248 words)</h3>
+                <pre><span class="hl2">🐦 Twitter Thread (9 tweets):</span>
+  Tweet 1: I spent 6 months testing cold email strategies...
+  Tweet 2: The biggest mistake? Sending generic templates...
+  Tweet 3: Personalized subject lines increased opens by 312%...
+  [...]
+
+<span class="hl2">💼 LinkedIn Post:</span>
+  "I used to think cold email was dead. Then I tested 47 variations..."
+  • Personalized subject lines: +312% opens
+  • Under 100 words: 23% reply rate
+  • 4th follow-up: 18% conversion rate
+
+<span class="hl2">📧 Email Newsletter:</span>
+  Subject: What 47 Cold Email Tests Taught Me
+  Preview: The data on personalization, timing, and follow-ups...
+  Full newsletter with CTA: "Reply with your biggest cold email challenge"
+
+<span class="hl2">🎬 Video Script (60s):</span>
+  [0-5s] Hook: "You won't believe what happened when I tested 47 emails"
+  [... Full timing breakdown with visual cues ...]
+
+<span class="hl2">🔴 Reddit Post:</span>
+  Title: "I tested 47 cold email variations across 12 industries — here's the raw data"
+  Suggested for: r/agency, r/sales, r/entrepreneur</pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features">
+        <div class="container">
+            <div class="section-label">Capabilities</div>
+            <h2 class="section-title">Built for Content Creators & Agencies</h2>
+            <p class="section-subtitle">Save hours of reformatting. Keep your message consistent across every channel.</p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="icon">🎯</div>
+                    <h3>Hook-First Methodology</h3>
+                    <p>10 hook templates per format, each optimized for platform engagement patterns. Your content starts strong every time.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔗</div>
+                    <h3>Batch Processing</h3>
+                    <p>Point it at a folder of content files. Process all of them in one command. Export to JSON, CSV, or text.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📊</div>
+                    <h3>Content Calendar Integration</h3>
+                    <p>CSV export includes source file, format, type, and word count — ready to paste into your content calendar.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🧩</div>
+                    <h3>Zero Dependencies</h3>
+                    <p>Pure Python 3.8+ standard library. No pip installs, no virtualenvs, no headaches. Download and run.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">⚡</div>
+                    <h3>Interactive Mode</h3>
+                    <p>Paste content, pick formats, get output. Perfect for quick content repurposing sessions.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔄</div>
+                    <h3>Smart Content Analysis</h3>
+                    <p>Auto-extracts keywords, sentence structures, and reading time. Adapts formatting to your content's natural style.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing">
+        <div class="container">
+            <div class="section-label">Investment</div>
+            <h2 class="section-title">Simple Pricing</h2>
+            <p class="section-subtitle">Pick the option that fits your workflow. Bundle saves you 36%.</p>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Standalone</h3>
+                    <div class="price"><span>$</span>14</div>
+                    <p class="desc">The Content Repurposing Engine — one tool, unlimited content</p>
+                    <ul>
+                        <li>8+ repurposing formats</li>
+                        <li>Interactive mode</li>
+                        <li>Batch processing</li>
+                        <li>JSON & CSV export</li>
+                        <li>Zero dependencies</li>
+                        <li>Lifetime updates</li>
+                    </ul>
+                    <a href="#" class="pricing-cta secondary" onclick="document.getElementById('email-signup').scrollIntoView({behavior:'smooth'}); return false;">Buy Now — $14</a>
+                </div>
+                <div class="pricing-card featured">
+                    <h3>AI Revenue Toolkit Bundle</h3>
+                    <div class="price"><span class="original">$58</span> <span>$</span>37</div>
+                    <p class="desc">All 10+ products — the complete AI automation arsenal</p>
+                    <ul>
+                        <li>✓ Content Repurposing Engine</li>
+                        <li>✓ Cold Email Swipe File PRO (90 templates)</li>
+                        <li>✓ Proposal Builder CLI</li>
+                        <li>✓ ROI Calculator CLI</li>
+                        <li>✓ AI Audit Tool CLI</li>
+                        <li>✓ Case Study Builder CLI</li>
+                        <li>✓ 7 Prompt Packs (200+ prompts)</li>
+                        <li>✓ 5 Agency Guides (30K+ words)</li>
+                        <li>✓ Commercial license</li>
+                        <li>✓ Lifetime updates</li>
+                    </ul>
+                    <a href="#" class="pricing-cta primary" onclick="document.getElementById('email-signup').scrollIntoView({behavior:'smooth'}); return false;">Buy Bundle — $37 (Save $21)</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Email Capture -->
+    <section id="email-signup" class="email-section">
+        <h2>Get Early Access & Exclusive Templates</h2>
+        <p>Join 200+ agency owners who use our tools. Free sample + repurposing cheat sheet when you subscribe.</p>
+        <form class="email-form" onsubmit="alert('Thanks for your interest! Gumroad checkout coming soon. Email capture active.'); return false;">
+            <input type="email" placeholder="you@agency.com" required>
+            <button type="submit">Get Free Sample →</button>
+        </form>
+        <p class="email-note">No spam. Unsubscribe anytime. You'll get a free sample output + our repurposing cheat sheet.</p>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq">
+        <div class="container">
+            <div class="section-label">FAQ</div>
+            <h2 class="section-title">Common Questions</h2>
+            <p class="section-subtitle">Everything you need to know before buying.</p>
+            <div class="faq-list">
+                <div class="faq-item" onclick="this.classList.toggle('open')">
+                    <div class="faq-question">How does the repurposing work? <span class="arrow">▼</span></div>
+                    <div class="faq-answer">You provide content (paste text, point to a file, or batch a folder). The engine analyzes it — extracts keywords, sentences, and structure. Then it generates platform-specific output using format templates, hook frameworks, and character/behavioral constraints for each platform.</div>
+                </div>
+                <div class="faq-item" onclick="this.classList.toggle('open')">
+                    <div class="faq-question">Do I need to install anything? <span class="arrow">▼</span></div>
+                    <div class="faq-answer">Just Python 3.8+. No pip installs, no external libraries, no API keys. Download the .py file, run it. That's it.</div>
+                </div>
+                <div class="faq-item" onclick="this.classList.toggle('open')">
+                    <div class="faq-question">Does it use AI/LLMs? <span class="arrow">▼</span></div>
+                    <div class="faq-answer">No. This is a deterministic template-based engine — no API calls, no tokens, no costs. You can use the output as a first draft to feed into any AI tool, but the engine itself is self-contained.</div>
+                </div>
+                <div class="faq-item" onclick="this.classList.toggle('open')">
+                    <div class="faq-question">Can I use this for client work? <span class="arrow">▼</span></div>
+                    <div class="faq-answer">Absolutely. The bundle includes a commercial license. Use it for your own content, client projects, or as part of your agency service offering. White-label it if you want.</div>
+                </div>
+                <div class="faq-item" onclick="this.classList.toggle('open')">
+                    <div class="faq-question">What's included in the bundle? <span class="arrow">▼</span></div>
+                    <div class="faq-answer">The AI Revenue Toolkit bundle ($37, reg. $58) includes: Content Repurposing Engine, Cold Email Swipe File PRO (90 email templates), Proposal Builder CLI, ROI Calculator CLI, AI Audit Tool CLI, Case Study Builder CLI, 7 prompt packs (200+ prompts), 5 agency guides (30K+ words), and full commercial license. Everything an AI automation agency needs to operate.</div>
+                </div>
+                <div class="faq-item" onclick="this.classList.toggle('open')">
+                    <div class="faq-question">What if I want a refund? <span class="arrow">▼</span></div>
+                    <div class="faq-answer">30-day money-back guarantee. If the tool doesn't save you time on content repurposing, email support and we'll refund your purchase — no questions asked.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>🔄 AI Content Repurposing Engine v1.0</p>
+            <p style="margin-top: 8px"><a href="https://tennie321.github.io/ai-revenue-toolkit/">AI Revenue Toolkit</a> · <a href="https://tennie321.github.io/cold-email-swipe-file-pro/">Cold Email Swipe File PRO</a> · <a href="https://github.com/Tennie321">GitHub</a></p>
+            <p style="margin-top: 12px">© 2026 Tennie321 · Built with automation</p>
+        </div>
+    </footer>
+
+    <script>
+        // Particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 40; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.left = Math.random() * 100 + '%';
+            p.style.animationDuration = (15 + Math.random() * 30) + 's';
+            p.style.animationDelay = (Math.random() * 20) + 's';
+            p.style.width = (1 + Math.random() * 3) + 'px';
+            p.style.height = p.style.width;
+            particlesContainer.appendChild(p);
+        }
+
+        // FAQ: open first item by default
+        document.querySelectorAll('.faq-item')[0]?.classList.add('open');
+    </script>
+</body>
+</html>

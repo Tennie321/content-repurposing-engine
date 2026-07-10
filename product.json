@@ -1,0 +1,40 @@
+{
+  "product_name": "AI Content Repurposing Engine",
+  "version": "1.0",
+  "date": "2026-07-10",
+  "type": "Python CLI tool",
+  "format": "Python script (runs on Python 3.8+)",
+  "description": "A powerful CLI tool that transforms any piece of content into 8+ platform-optimized formats. Takes blog posts, articles, or notes and generates Twitter threads, LinkedIn posts, email newsletters, short video scripts, Reddit posts, Instagram captions, podcast scripts, and blog summaries — all with proper formatting, structure, and engagement hooks.",
+  "features": [
+    "8+ repurposing formats: Twitter/X Thread, LinkedIn Post, Email Newsletter, Short Video Script, Reddit Post, Instagram Caption, Podcast Script, Blog Summary",
+    "Hook-first methodology with 10 hook templates per format",
+    "Platform-specific formatting (character limits, hashtags, emoji density)",
+    "Bullet-to-narrative conversion for long-form content",
+    "Batch processing for multiple input files",
+    "Interactive mode for quick single-content repurposing",
+    "JSON export for integration with publishing tools",
+    "Content calendar integration (CSV export)",
+    "Demo mode with sample content for testing",
+    "Zero external dependencies — pure Python standard library"
+  ],
+  "price_standalone": "$14",
+  "price_bundle": "$37 (AI Revenue Toolkit bundle — 36% off $58)",
+  "file": "content_repurposing_engine.py",
+  "complementary_products": [
+    "AI Social Media Content Engine ($14)",
+    "Cold Email Swipe File PRO ($19)",
+    "AI Revenue Toolkit Bundle ($37)"
+  ],
+  "target_audience": [
+    "Content creators and marketers repurposing content",
+    "AI automation agency owners doing content marketing",
+    "Freelancers managing multiple content channels",
+    "SaaS founders building personal brand across platforms"
+  ],
+  "monetization_paths": [
+    "Gumroad download at $14 standalone",
+    "AI Revenue Toolkit bundle inclusion at $37",
+    "Wholesale to agencies at $8/unit (50+ qty)",
+    "Free limited version as email capture lead magnet"
+  ]
+}
